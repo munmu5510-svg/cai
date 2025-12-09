@@ -15,9 +15,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
   const [selectedConcept, setSelectedConcept] = useState<BusinessConcept | null>(null);
 
   useEffect(() => {
-    const loaded = storageService.getConcepts(user.id);
-    // Sort by newest first
-    setConcepts(loaded.sort((a, b) => b.createdAt - a.createdAt));
+    const loadConcepts = async () => {
+      if (!user?.id) return;
+      const loaded = await storageService.getConcepts(user.id);
+      // Sort by newest first
+      setConcepts(loaded.sort((a, b) => b.createdAt - a.createdAt));
+    };
+    loadConcepts();
   }, [user.id]);
 
   const handleExportPDF = (concept: BusinessConcept) => {

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState, User } from './types';
+import { auth } from './services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import { storageService } from './services/storageService';
 
 // Pages
@@ -18,13 +20,28 @@ import { CAIAgent } from './components/CAIAgent';
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('SPLASH');
   const [user, setUser] = useState<User | null>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
-    // Check for existing session
-    const storedUser = storageService.getCurrentUser();
-    if (storedUser) {
-      setUser(storedUser);
-    }
+    // Listen for Firebase Auth changes
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Auth success, now fetch the full user profile from Realtime DB
+        const profile = await storageService.getUserProfile(firebaseUser.uid);
+        if (profile) {
+          setUser(profile);
+        } else {
+          // Fallback if DB entry missing (shouldn't happen in normal flow)
+           console.error("User authenticated but profile not found in DB");
+           setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setAuthInitialized(true);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleSplashComplete = () => {
@@ -40,14 +57,17 @@ const App: React.FC = () => {
     setView('DASHBOARD');
   };
 
-  const handleLogout = () => {
-    storageService.setCurrentUser(null);
+  const handleLogout = async () => {
+    await auth.signOut();
     setUser(null);
     setView('LANDING');
   };
 
   // --- Router Logic ---
   const renderView = () => {
+    // While auth is initializing, we can show splash or just wait if splash isn't active
+    if (!authInitialized && view !== 'SPLASH') return null; 
+
     switch (view) {
       case 'SPLASH':
         return <Splash onComplete={handleSplashComplete} />;

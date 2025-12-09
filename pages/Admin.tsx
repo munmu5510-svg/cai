@@ -7,7 +7,11 @@ export const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    setUsers(storageService.getUsers());
+    const fetchUsers = async () => {
+      const data = await storageService.getAllUsers();
+      setUsers(data);
+    };
+    fetchUsers();
   }, []);
 
   return (

@@ -42,7 +42,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!strategy) return;
     
     // Create a title from the first few words of the idea or default
@@ -57,8 +57,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
       strategy: strategy
     };
 
-    storageService.saveConcept(user.id, concept);
-    alert('Concept saved to secure storage.');
+    try {
+      await storageService.saveConcept(user.id, concept);
+      alert('Concept saved to secure storage.');
+    } catch (e) {
+      alert('Failed to save concept. Please try again.');
+    }
   };
 
   const handleExportPDF = () => {

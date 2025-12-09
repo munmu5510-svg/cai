@@ -13,25 +13,31 @@ interface AccountProps {
 export const Account: React.FC<AccountProps> = ({ user, onUpdateUser, onLogout }) => {
   const [code, setCode] = useState('');
   const [message, setMessage] = useState('');
+  const [updating, setUpdating] = useState(false);
 
-  const handleRedeem = () => {
+  const handleRedeem = async () => {
     setMessage('');
-    if (code === PROMO_CODE) {
-      const updatedUser = { ...user, plan: 'PRO_PLUS' as const };
-      storageService.saveUser(updatedUser);
-      storageService.setCurrentUser(updatedUser);
-      onUpdateUser(updatedUser);
-      setMessage('Success! You have been upgraded to Pro+.');
-    } else if (code === ADMIN_CODE) {
-      const updatedUser = { ...user, role: 'ADMIN' as const };
-      storageService.saveUser(updatedUser);
-      storageService.setCurrentUser(updatedUser);
-      onUpdateUser(updatedUser);
-      setMessage('Success! You now have Admin privileges.');
-    } else {
-      setMessage('Invalid code.');
+    setUpdating(true);
+    try {
+      if (code === PROMO_CODE) {
+        const updatedUser = { ...user, plan: 'PRO_PLUS' as const };
+        await storageService.saveUser(updatedUser);
+        onUpdateUser(updatedUser);
+        setMessage('Success! You have been upgraded to Pro+.');
+      } else if (code === ADMIN_CODE) {
+        const updatedUser = { ...user, role: 'ADMIN' as const };
+        await storageService.saveUser(updatedUser);
+        onUpdateUser(updatedUser);
+        setMessage('Success! You now have Admin privileges.');
+      } else {
+        setMessage('Invalid code.');
+      }
+    } catch (e) {
+      setMessage('Error updating account. Please try again.');
+    } finally {
+      setUpdating(false);
+      setCode('');
     }
-    setCode('');
   };
 
   return (
@@ -69,7 +75,9 @@ export const Account: React.FC<AccountProps> = ({ user, onUpdateUser, onLogout }
             onChange={(e) => setCode(e.target.value)}
             placeholder="Enter code (e.g. cai2301)"
           />
-          <Button onClick={handleRedeem}>Apply</Button>
+          <Button onClick={handleRedeem} disabled={updating}>
+            {updating ? 'Applying...' : 'Apply'}
+          </Button>
         </div>
         {message && <p className={`mt-4 text-sm ${message.includes('Success') ? 'text-green-400' : 'text-red-400'}`}>{message}</p>}
       </Card>

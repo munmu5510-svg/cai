@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Input, Card } from '../components/Shared';
 import { storageService } from '../services/storageService';
+import { auth } from '../services/firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { User, PlanType } from '../types';
 import { PRICING } from '../constants';
 
@@ -16,46 +18,62 @@ export const Auth: React.FC<AuthProps> = ({ onAuthSuccess, onBack }) => {
   const [name, setName] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('STANDARD');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    if (isSignUp) {
-      if (!name || !email || !password) {
-        setError("All fields are required.");
-        return;
-      }
-      const users = storageService.getUsers();
-      if (users.some(u => u.email === email)) {
-        setError("User already exists.");
-        return;
-      }
-      
-      // Simulate Payment Process
-      const newUser: User = {
-        id: Date.now().toString(),
-        name,
-        email,
-        plan: selectedPlan, // User chooses plan on signup
-        role: 'USER',
-        joinedAt: new Date().toISOString()
-      };
-      
-      storageService.saveUser(newUser);
-      storageService.setCurrentUser(newUser);
-      onAuthSuccess(newUser);
-    } else {
-      const users = storageService.getUsers();
-      const user = users.find(u => u.email === email); // Simple mock auth, no real password check for demo
-      if (user) {
-        // Ideally check password here if we stored it (we didn't for simplicity, assuming LocalStorage "auth")
-        // For a real app, hash password. Here, we just trust the email lookup for the mockup.
-        storageService.setCurrentUser(user);
-        onAuthSuccess(user);
+    try {
+      if (isSignUp) {
+        if (!name || !email || !password) {
+          throw new Error("All fields are required.");
+        }
+        
+        // 1. Create User in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const firebaseUser = userCredential.user;
+
+        // 2. Create User Profile in Realtime DB
+        const newUser: User = {
+          id: firebaseUser.uid,
+          name,
+          email,
+          plan: selectedPlan,
+          role: 'USER',
+          joinedAt: new Date().toISOString()
+        };
+        
+        await storageService.saveUser(newUser);
+        onAuthSuccess(newUser);
+
       } else {
-        setError("User not found. Please sign up.");
+        // Sign In
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const firebaseUser = userCredential.user;
+
+        // Fetch User Profile from DB
+        const userProfile = await storageService.getUserProfile(firebaseUser.uid);
+        
+        if (userProfile) {
+          onAuthSuccess(userProfile);
+        } else {
+          // This handles cases where Auth exists but DB data is missing
+          throw new Error("User profile not found.");
+        }
       }
+    } catch (err: any) {
+      console.error(err);
+      let msg = "Authentication failed.";
+      if (err.code === 'auth/email-already-in-use') msg = "Email already in use.";
+      if (err.code === 'auth/wrong-password') msg = "Invalid password.";
+      if (err.code === 'auth/user-not-found') msg = "User not found.";
+      if (err.code === 'auth/weak-password') msg = "Password should be at least 6 characters.";
+      if (err.message) msg = err.message;
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,8 +130,8 @@ export const Auth: React.FC<AuthProps> = ({ onAuthSuccess, onBack }) => {
             </div>
           )}
 
-          <Button fullWidth type="submit" className="mt-6">
-            {isSignUp ? (selectedPlan === 'PRO_PLUS' ? `Pay $${PRICING.PRO_PLUS} & Sign Up` : `Pay $${PRICING.STANDARD} & Sign Up`) : 'Sign In'}
+          <Button fullWidth type="submit" className="mt-6" disabled={loading}>
+            {loading ? 'Processing...' : (isSignUp ? (selectedPlan === 'PRO_PLUS' ? `Pay $${PRICING.PRO_PLUS} & Sign Up` : `Pay $${PRICING.STANDARD} & Sign Up`) : 'Sign In')}
           </Button>
         </form>
 

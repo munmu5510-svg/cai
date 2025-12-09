@@ -18,25 +18,28 @@ export const CAIAgent: React.FC<CAIAgentProps> = ({ user }) => {
 
   // Load history on mount or user change
   useEffect(() => {
-    if (user) {
-      const history = storageService.getChatHistory(user.id);
-      if (history.length > 0) {
-        setMessages(history);
-      } else {
-        setMessages([{ 
-          id: 'init', 
-          role: 'model', 
-          text: 'Hello! I am here to help you navigate WySider. How can I assist you today?', 
-          timestamp: Date.now() 
-        }]);
+    const loadHistory = async () => {
+      if (user) {
+        const history = await storageService.getChatHistory(user.id);
+        if (history.length > 0) {
+          setMessages(history);
+        } else {
+          setMessages([{ 
+            id: 'init', 
+            role: 'model', 
+            text: 'Hello! I am here to help you navigate WySider. How can I assist you today?', 
+            timestamp: Date.now() 
+          }]);
+        }
+        setIsInitialized(true);
       }
-      setIsInitialized(true);
-    }
+    };
+    loadHistory();
   }, [user.id]);
 
   // Save history whenever messages change
   useEffect(() => {
-    if (isInitialized && user) {
+    if (isInitialized && user && messages.length > 0) {
       storageService.saveChatHistory(user.id, messages);
     }
   }, [messages, user, isInitialized]);

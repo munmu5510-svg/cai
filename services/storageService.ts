@@ -1,71 +1,97 @@
+import { db } from './firebase';
+import { ref, get, set, child, push, update } from 'firebase/database';
 import { User, BusinessConcept, ChatMessage } from '../types';
 
-const USERS_KEY = 'concept_ai_users';
-const CURRENT_USER_KEY = 'concept_ai_current_user';
-const CONCEPTS_KEY = 'concept_ai_concepts';
-const CHAT_HISTORY_KEY = 'cai_chat_history';
-
 export const storageService = {
-  getUsers: (): User[] => {
-    const data = localStorage.getItem(USERS_KEY);
-    return data ? JSON.parse(data) : [];
-  },
-
-  saveUser: (user: User) => {
-    const users = storageService.getUsers();
-    const existingIndex = users.findIndex(u => u.email === user.email);
-    if (existingIndex >= 0) {
-      users[existingIndex] = user;
-    } else {
-      users.push(user);
-    }
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  },
-
-  getCurrentUser: (): User | null => {
-    const data = localStorage.getItem(CURRENT_USER_KEY);
-    return data ? JSON.parse(data) : null;
-  },
-
-  setCurrentUser: (user: User | null) => {
-    if (user) {
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-      storageService.saveUser(user);
-    } else {
-      localStorage.removeItem(CURRENT_USER_KEY);
+  // --- Users ---
+  getUserProfile: async (userId: string): Promise<User | null> => {
+    try {
+      const snapshot = await get(child(ref(db), `users/${userId}`));
+      if (snapshot.exists()) {
+        return snapshot.val() as User;
+      }
+      return null;
+    } catch (e) {
+      console.error("Error fetching user profile:", e);
+      return null;
     }
   },
 
-  getConcepts: (userId: string): BusinessConcept[] => {
-    const userConceptsKey = `${CONCEPTS_KEY}_${userId}`;
-    const userData = localStorage.getItem(userConceptsKey);
-    return userData ? JSON.parse(userData) : [];
-  },
-
-  saveConcept: (userId: string, concept: BusinessConcept) => {
-    const concepts = storageService.getConcepts(userId);
-    const index = concepts.findIndex(c => c.id === concept.id);
-    if (index >= 0) {
-      concepts[index] = concept;
-    } else {
-      concepts.push(concept);
+  saveUser: async (user: User): Promise<void> => {
+    try {
+      await set(ref(db, `users/${user.id}`), user);
+    } catch (e) {
+      console.error("Error saving user profile:", e);
+      throw e;
     }
-    localStorage.setItem(`${CONCEPTS_KEY}_${userId}`, JSON.stringify(concepts));
   },
 
-  getChatHistory: (userId: string): ChatMessage[] => {
-    const key = `${CHAT_HISTORY_KEY}_${userId}`;
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : [];
+  getAllUsers: async (): Promise<User[]> => {
+    try {
+      const snapshot = await get(ref(db, 'users'));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        return Object.values(data);
+      }
+      return [];
+    } catch (e) {
+      console.error("Error fetching all users:", e);
+      return [];
+    }
   },
 
-  saveChatHistory: (userId: string, messages: ChatMessage[]) => {
-    const key = `${CHAT_HISTORY_KEY}_${userId}`;
-    localStorage.setItem(key, JSON.stringify(messages));
+  // --- Concepts ---
+  getConcepts: async (userId: string): Promise<BusinessConcept[]> => {
+    try {
+      const snapshot = await get(child(ref(db), `concepts/${userId}`));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        return Object.values(data);
+      }
+      return [];
+    } catch (e) {
+      console.error("Error fetching concepts:", e);
+      return [];
+    }
   },
 
-  clearChatHistory: (userId: string) => {
-    const key = `${CHAT_HISTORY_KEY}_${userId}`;
-    localStorage.removeItem(key);
+  saveConcept: async (userId: string, concept: BusinessConcept): Promise<void> => {
+    try {
+      // Use concept.id as key, or push for new ID. We use concept.id here.
+      await set(ref(db, `concepts/${userId}/${concept.id}`), concept);
+    } catch (e) {
+      console.error("Error saving concept:", e);
+      throw e;
+    }
+  },
+
+  // --- Chat History ---
+  getChatHistory: async (userId: string): Promise<ChatMessage[]> => {
+    try {
+      const snapshot = await get(child(ref(db), `chats/${userId}`));
+      if (snapshot.exists()) {
+        return snapshot.val() as ChatMessage[];
+      }
+      return [];
+    } catch (e) {
+      console.error("Error fetching chat history:", e);
+      return [];
+    }
+  },
+
+  saveChatHistory: async (userId: string, messages: ChatMessage[]): Promise<void> => {
+    try {
+      await set(ref(db, `chats/${userId}`), messages);
+    } catch (e) {
+      console.error("Error saving chat history:", e);
+    }
+  },
+
+  clearChatHistory: async (userId: string): Promise<void> => {
+    try {
+      await set(ref(db, `chats/${userId}`), null);
+    } catch (e) {
+      console.error("Error clearing chat history:", e);
+    }
   }
 };
