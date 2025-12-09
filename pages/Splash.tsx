@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Logo } from '../components/Shared';
 
 interface SplashProps {
   onComplete: () => void;
@@ -12,8 +13,11 @@ export const Splash: React.FC<SplashProps> = ({ onComplete }) => {
 
   return (
     <div className="h-screen w-screen bg-vision-black flex flex-col items-center justify-center z-50">
-      <div className="relative">
+      <div className="relative flex flex-col items-center">
         <div className="absolute inset-0 bg-electric-blue blur-3xl opacity-20 animate-pulse rounded-full"></div>
+        <div className="z-10 animate-fade-in mb-6">
+          <Logo className="w-24 h-24" showText={false} />
+        </div>
         <h1 className="relative text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-200 to-gray-500 tracking-tighter animate-fade-in z-10">
           WySider
         </h1>

@@ -14,6 +14,22 @@ export const Icons = {
   Settings: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
 };
 
+// --- Logo ---
+export const Logo: React.FC<{ className?: string, showText?: boolean }> = ({ className = "w-8 h-8", showText = true }) => (
+  <div className="flex items-center gap-2 select-none">
+    <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="24" className="fill-vision-dark" />
+      <path d="M20 35L38 75L50 45L62 75L80 35" className="stroke-electric-blue" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="50" cy="20" r="6" className="fill-neon-cyan" />
+    </svg>
+    {showText && (
+      <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-neon-cyan tracking-tight">
+        WySider
+      </span>
+    )}
+  </div>
+);
+
 // --- Button ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -96,7 +112,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentVie
     <div className="min-h-screen bg-vision-black flex text-gray-200">
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 w-full bg-vision-dark border-b border-gray-800 z-50 px-4 py-3 flex items-center justify-between">
-        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-neon-cyan">WySider</span>
+        <Logo className="w-8 h-8" />
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-300">
           {isMobileMenuOpen ? <Icons.X /> : <Icons.Menu />}
         </button>
@@ -108,8 +124,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentVie
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="h-full flex flex-col">
-          <div className="p-6 hidden lg:block">
-             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-neon-cyan">WySider</span>
+          <div className="p-6 hidden lg:flex items-center">
+             <Logo className="w-10 h-10" />
           </div>
           <div className="mt-16 lg:mt-6 flex-1 px-4 space-y-2">
             {navItems.map((item) => (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../components/Shared';
+import { Button, Logo } from '../components/Shared';
 import { PRICING, MOCK_FEATURES } from '../constants';
 
 interface LandingProps {
@@ -11,7 +11,7 @@ export const Landing: React.FC<LandingProps> = ({ onStart }) => {
     <div className="min-h-screen bg-vision-black text-white overflow-hidden">
       {/* Hero */}
       <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto">
-        <span className="text-2xl font-bold tracking-tighter">WySider</span>
+        <Logo className="w-8 h-8" />
         <Button variant="outline" size="sm" onClick={onStart}>Log In</Button>
       </nav>
 
