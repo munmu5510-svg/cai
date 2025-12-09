@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Input } from '../components/Shared';
+import { Card, Button } from '../components/Shared';
 import { generateBusinessStrategy } from '../services/geminiService';
 import { User, BusinessConcept } from '../types';
 import { storageService } from '../services/storageService';

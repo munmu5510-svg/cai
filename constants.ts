@@ -1,5 +1,3 @@
-import { PlanType } from './types';
-
 export const APP_NAME = "WySider";
 export const ADMIN_CODE = "admin2301";
 export const PROMO_CODE = "wysider2301";
