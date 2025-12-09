@@ -36,17 +36,31 @@ export const generateBusinessStrategy = async (
     console.log("Attempting generation with gemini-3-pro-preview...");
     const chat = createChat('gemini-3-pro-preview');
     const response = await chat.sendMessage({ message: prompt });
-    return response.text;
+    const text = response.text || "";
+
+    // CRITICAL FIX: Detect soft refusals/errors returned as text by the model
+    if (text.includes("I apologize, but I encountered an error") || text.includes("I apologize")) {
+        throw new Error("Model returned soft refusal/error text: " + text);
+    }
+
+    return text;
 
   } catch (error: any) {
-    console.warn("Gemini 3 Pro failed. Falling back to Flash.", error);
+    console.warn("Gemini 3 Pro failed or refused. Falling back to Flash.", error);
     
     try {
         // 2. Fallback to Flash model
         console.log("Attempting fallback generation with gemini-2.5-flash...");
         const chat = createChat('gemini-2.5-flash');
         const response = await chat.sendMessage({ message: prompt });
-        return response.text;
+        const text = response.text || "";
+
+        // Check fallback response as well
+        if (text.includes("I apologize, but I encountered an error")) {
+             throw new Error("Fallback model also returned soft refusal");
+        }
+        
+        return text;
 
     } catch (fallbackError: any) {
         console.error("Critical Error generating strategy:", fallbackError);
