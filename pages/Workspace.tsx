@@ -3,6 +3,7 @@ import { Card, Button, Input } from '../components/Shared';
 import { generateBusinessStrategy } from '../services/geminiService';
 import { User, BusinessConcept } from '../types';
 import { storageService } from '../services/storageService';
+import { generateStrategyPDF } from '../services/pdfService';
 
 interface WorkspaceProps {
   user: User;
@@ -62,56 +63,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
 
   const handleExportPDF = () => {
     if (!strategy) return;
-    
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const title = idea.split(' ').slice(0, 8).join(' ') || "Business Strategy";
-      
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>WySider Strategy - ${title}</title>
-            <style>
-              body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #111; line-height: 1.6; max-width: 800px; margin: 0 auto; }
-              h1 { color: #111; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-              h2 { color: #333; margin-top: 30px; }
-              h3 { color: #333; margin-top: 20px; font-weight: bold; }
-              .meta { color: #666; font-size: 0.9em; margin-bottom: 40px; }
-              .logo { font-weight: bold; font-size: 1.5em; margin-bottom: 40px; color: #2563eb; }
-              pre { white-space: pre-wrap; font-family: inherit; }
-              .footer { margin-top: 50px; font-size: 0.8em; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
-              
-              /* Hide elements when printing */
-              @media print {
-                .no-print { display: none; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="logo">WySider</div>
-            <h1>${title}</h1>
-            <div class="meta">Generated for ${user.name} on ${new Date().toLocaleDateString()}</div>
-            <div class="content">
-              ${strategy.replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>').replace(/\n/g, '<br/>')}
-            </div>
-            <div class="footer">Powered by WySider • Godin / Jobs / Musk Framework</div>
-            
-            <script>
-              window.onload = function() { 
-                // Delay slightly to ensure styles render before print dialog
-                setTimeout(function() {
-                  window.print();
-                  // Optional: Close after print
-                  // window.onafterprint = function() { window.close(); }
-                }, 500);
-              }
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    }
+    const titleSnippet = idea.split(' ').slice(0, 8).join(' ') || "Business Strategy";
+    generateStrategyPDF(titleSnippet, strategy, user, Date.now());
   };
 
   return (

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Button, Icons, Modal } from '../components/Shared';
 import { User, BusinessConcept } from '../types';
 import { storageService } from '../services/storageService';
+import { generateStrategyPDF } from '../services/pdfService';
 
 interface DashboardProps {
   user: User;
@@ -21,45 +22,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
 
   const handleExportPDF = (concept: BusinessConcept) => {
     if (!concept.strategy) return;
-    
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const title = concept.title;
-      
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>WySider Strategy - ${title}</title>
-            <style>
-              body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #111; line-height: 1.6; max-width: 800px; margin: 0 auto; }
-              h1 { color: #111; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-              h2 { color: #333; margin-top: 30px; }
-              h3 { color: #333; margin-top: 20px; font-weight: bold; }
-              .meta { color: #666; font-size: 0.9em; margin-bottom: 40px; }
-              .logo { font-weight: bold; font-size: 1.5em; margin-bottom: 40px; color: #2563eb; }
-              pre { white-space: pre-wrap; font-family: inherit; }
-              .footer { margin-top: 50px; font-size: 0.8em; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
-            </style>
-          </head>
-          <body>
-            <div class="logo">WySider</div>
-            <h1>${title}</h1>
-            <div class="meta">Generated for ${user.name} on ${new Date(concept.createdAt).toLocaleDateString()}</div>
-            <div class="content">
-              ${concept.strategy.replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>').replace(/\n/g, '<br/>')}
-            </div>
-            <div class="footer">Powered by WySider • Godin / Jobs / Musk Framework</div>
-            <script>
-              window.onload = function() { 
-                setTimeout(function() { window.print(); }, 500);
-              }
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    }
+    generateStrategyPDF(concept.title, concept.strategy, user, concept.createdAt);
   };
 
   return (
