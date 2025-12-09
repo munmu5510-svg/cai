@@ -15,7 +15,7 @@ export const Splash: React.FC<SplashProps> = ({ onComplete }) => {
       <div className="relative">
         <div className="absolute inset-0 bg-electric-blue blur-3xl opacity-20 animate-pulse rounded-full"></div>
         <h1 className="relative text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-200 to-gray-500 tracking-tighter animate-fade-in z-10">
-          Concept AI
+          WySider
         </h1>
       </div>
       <p className="mt-4 text-gray-500 font-light tracking-widest uppercase text-sm animate-slide-up">

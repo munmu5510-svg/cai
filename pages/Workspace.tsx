@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Card, Button, Input } from '../components/Shared';
 import { generateBusinessStrategy } from '../services/geminiService';
-import { User } from '../types';
+import { User, BusinessConcept } from '../types';
+import { storageService } from '../services/storageService';
 
 interface WorkspaceProps {
   user: User;
@@ -21,7 +22,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
       const prompt = `
         User Idea: ${idea}
         
-        Act as the Marketer Agent (Concept AI). 
+        Act as the Marketer Agent (WySider). 
         Analyze this idea using the Seth Godin / Steve Jobs / Elon Musk framework.
         Provide a structured output:
         1. **The Concept Refined** (Make it remarkable)
@@ -37,6 +38,79 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
       setStrategy("Error connecting to the visionary matrix.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSave = () => {
+    if (!strategy) return;
+    
+    // Create a title from the first few words of the idea or default
+    const titleSnippet = idea.split(' ').slice(0, 5).join(' ') + (idea.split(' ').length > 5 ? '...' : '');
+    const title = titleSnippet || "New Concept Strategy";
+
+    const concept: BusinessConcept = {
+      id: Date.now().toString(),
+      title: title,
+      description: idea,
+      createdAt: Date.now(),
+      strategy: strategy
+    };
+
+    storageService.saveConcept(user.id, concept);
+    alert('Concept saved to secure storage.');
+  };
+
+  const handleExportPDF = () => {
+    if (!strategy) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const title = idea.split(' ').slice(0, 8).join(' ') || "Business Strategy";
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>WySider Strategy - ${title}</title>
+            <style>
+              body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #111; line-height: 1.6; max-width: 800px; margin: 0 auto; }
+              h1 { color: #111; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+              h2 { color: #333; margin-top: 30px; }
+              h3 { color: #333; margin-top: 20px; font-weight: bold; }
+              .meta { color: #666; font-size: 0.9em; margin-bottom: 40px; }
+              .logo { font-weight: bold; font-size: 1.5em; margin-bottom: 40px; color: #2563eb; }
+              pre { white-space: pre-wrap; font-family: inherit; }
+              .footer { margin-top: 50px; font-size: 0.8em; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
+              
+              /* Hide elements when printing */
+              @media print {
+                .no-print { display: none; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="logo">WySider</div>
+            <h1>${title}</h1>
+            <div class="meta">Generated for ${user.name} on ${new Date().toLocaleDateString()}</div>
+            <div class="content">
+              ${strategy.replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>').replace(/\n/g, '<br/>')}
+            </div>
+            <div class="footer">Powered by WySider • Godin / Jobs / Musk Framework</div>
+            
+            <script>
+              window.onload = function() { 
+                // Delay slightly to ensure styles render before print dialog
+                setTimeout(function() {
+                  window.print();
+                  // Optional: Close after print
+                  // window.onafterprint = function() { window.close(); }
+                }, 500);
+              }
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
     }
   };
 
@@ -67,7 +141,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
 
       {/* Output Section */}
       <div className="w-full md:w-2/3">
-        <Card className="h-full overflow-y-auto min-h-[500px] border-electric-blue/30">
+        <Card className="h-full overflow-y-auto min-h-[500px] border-electric-blue/30 relative">
           {!strategy && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50">
               <div className="w-24 h-24 border-4 border-gray-700 border-t-electric-blue rounded-full animate-spin mb-4" style={{ animationDuration: '3s' }}></div>
@@ -83,15 +157,21 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
           )}
 
           {strategy && (
-            <div className="prose prose-invert max-w-none">
+            <div className="prose prose-invert max-w-none pb-20">
               <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-neon-cyan mb-6">
                 Strategic Blueprint
               </h3>
               <div className="whitespace-pre-wrap leading-relaxed text-gray-200">
                 {strategy}
               </div>
-              <div className="mt-8 pt-6 border-t border-gray-800">
-                <Button variant="outline" size="sm">Save to Local Storage</Button>
+              
+              <div className="mt-8 pt-6 border-t border-gray-800 flex gap-4">
+                <Button variant="outline" size="sm" onClick={handleSave}>
+                  Save to Storage
+                </Button>
+                <Button variant="secondary" size="sm" onClick={handleExportPDF}>
+                  Download PDF
+                </Button>
               </div>
             </div>
           )}

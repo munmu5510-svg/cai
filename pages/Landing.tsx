@@ -11,7 +11,7 @@ export const Landing: React.FC<LandingProps> = ({ onStart }) => {
     <div className="min-h-screen bg-vision-black text-white overflow-hidden">
       {/* Hero */}
       <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto">
-        <span className="text-2xl font-bold tracking-tighter">Concept AI</span>
+        <span className="text-2xl font-bold tracking-tighter">WySider</span>
         <Button variant="outline" size="sm" onClick={onStart}>Log In</Button>
       </nav>
 
@@ -56,7 +56,7 @@ export const Landing: React.FC<LandingProps> = ({ onStart }) => {
                <div className="text-4xl font-bold mt-4 mb-6">${PRICING.STANDARD}</div>
                <ul className="space-y-3 mb-8 flex-1">
                  <li className="flex items-center gap-2 text-gray-400">✓ Basic Business Conception</li>
-                 <li className="flex items-center gap-2 text-gray-400">✓ CAI Support</li>
+                 <li className="flex items-center gap-2 text-gray-400">✓ WySider Support</li>
                  <li className="flex items-center gap-2 text-gray-400">✓ Local Storage Save</li>
                </ul>
                <Button variant="outline" fullWidth onClick={onStart}>Choose Standard</Button>

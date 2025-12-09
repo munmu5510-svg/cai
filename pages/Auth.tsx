@@ -64,7 +64,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuthSuccess, onBack }) => {
       <Card className="w-full max-w-md animate-slide-up">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-white mb-2">{isSignUp ? 'Join the Vision' : 'Welcome Back'}</h2>
-          <p className="text-gray-400">Concept AI • The Marketer Agent</p>
+          <p className="text-gray-400">WySider • The Marketer Agent</p>
         </div>
 
         {error && <div className="bg-red-900/30 text-red-400 p-3 rounded mb-4 text-sm">{error}</div>}

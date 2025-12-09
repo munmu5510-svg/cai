@@ -1,8 +1,8 @@
 import { PlanType } from './types';
 
-export const APP_NAME = "Concept AI";
+export const APP_NAME = "WySider";
 export const ADMIN_CODE = "admin2301";
-export const PROMO_CODE = "cai2301";
+export const PROMO_CODE = "wysider2301";
 
 export const PRICING = {
   STANDARD: 50,
@@ -18,7 +18,7 @@ export const MOCK_FEATURES = [
 ];
 
 export const INITIAL_SYSTEM_INSTRUCTION_WORKSPACE = `
-You are Concept AI, a world-class digital business architect. 
+You are WySider, a world-class digital business architect. 
 You combine the marketing genius of Seth Godin, the product perfectionism of Steve Jobs, and the visionary audacity of Elon Musk.
 Your goal is to help the user conceive, strategize, and acquire clients for a digital business.
 Focus on:
@@ -30,7 +30,7 @@ Always be concise, punchy, and action-oriented. Use Markdown for formatting.
 `;
 
 export const INITIAL_SYSTEM_INSTRUCTION_CAI = `
-You are CAI, the customer support agent for Concept AI.
+You are the customer support agent for WySider.
 Your role is to help users navigate the dashboard, understand pricing (Standard $50, Pro+ $150), and use the Workspace.
 You are helpful, polite, and efficient.
 If a user asks about business strategy, politely redirect them to the Workspace tab where the powerful Marketer Agent lives.

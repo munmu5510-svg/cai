@@ -1,16 +1,45 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Icons } from './Shared';
 import { generateCAIResponse } from '../services/geminiService';
-import { ChatMessage } from '../types';
+import { ChatMessage, User } from '../types';
+import { storageService } from '../services/storageService';
 
-export const CAIAgent: React.FC = () => {
+interface CAIAgentProps {
+  user: User;
+}
+
+export const CAIAgent: React.FC<CAIAgentProps> = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: '1', role: 'model', text: 'Hello! I am CAI. How can I assist you with Concept AI today?', timestamp: Date.now() }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load history on mount or user change
+  useEffect(() => {
+    if (user) {
+      const history = storageService.getChatHistory(user.id);
+      if (history.length > 0) {
+        setMessages(history);
+      } else {
+        setMessages([{ 
+          id: 'init', 
+          role: 'model', 
+          text: 'Hello! I am here to help you navigate WySider. How can I assist you today?', 
+          timestamp: Date.now() 
+        }]);
+      }
+      setIsInitialized(true);
+    }
+  }, [user.id]);
+
+  // Save history whenever messages change
+  useEffect(() => {
+    if (isInitialized && user) {
+      storageService.saveChatHistory(user.id, messages);
+    }
+  }, [messages, user, isInitialized]);
 
   useEffect(() => {
     if (isOpen && messagesEndRef.current) {
@@ -61,7 +90,7 @@ export const CAIAgent: React.FC = () => {
       <div className="p-4 border-b border-gray-800 bg-vision-gray rounded-t-2xl flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-          <span className="font-bold text-white">CAI Support</span>
+          <span className="font-bold text-white">WySider Support</span>
         </div>
         <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">
           <Icons.X />
@@ -97,7 +126,7 @@ export const CAIAgent: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask CAI..."
+            placeholder="Ask WySider..."
             className="flex-1 bg-black border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-electric-blue"
           />
           <button 

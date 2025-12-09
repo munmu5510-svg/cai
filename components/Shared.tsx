@@ -96,7 +96,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentVie
     <div className="min-h-screen bg-vision-black flex text-gray-200">
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 w-full bg-vision-dark border-b border-gray-800 z-50 px-4 py-3 flex items-center justify-between">
-        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-neon-cyan">Concept AI</span>
+        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-neon-cyan">WySider</span>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-300">
           {isMobileMenuOpen ? <Icons.X /> : <Icons.Menu />}
         </button>
@@ -109,7 +109,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNavigate, currentVie
       `}>
         <div className="h-full flex flex-col">
           <div className="p-6 hidden lg:block">
-             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-neon-cyan">Concept AI</span>
+             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-neon-cyan">WySider</span>
           </div>
           <div className="mt-16 lg:mt-6 flex-1 px-4 space-y-2">
             {navItems.map((item) => (

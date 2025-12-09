@@ -62,7 +62,7 @@ const App: React.FC = () => {
         return user ? (
           <Layout onNavigate={setView} currentView={view} user={user}>
             <Dashboard user={user} onNavigate={setView} />
-            <CAIAgent />
+            <CAIAgent user={user} />
           </Layout>
         ) : <Auth onAuthSuccess={handleAuthSuccess} onBack={() => setView('LANDING')} />;
 
@@ -70,7 +70,7 @@ const App: React.FC = () => {
         return user ? (
           <Layout onNavigate={setView} currentView={view} user={user}>
             <Workspace user={user} />
-            <CAIAgent />
+            <CAIAgent user={user} />
           </Layout>
         ) : null;
 
@@ -78,7 +78,7 @@ const App: React.FC = () => {
         return user ? (
           <Layout onNavigate={setView} currentView={view} user={user}>
             <Account user={user} onUpdateUser={setUser} onLogout={handleLogout} />
-            <CAIAgent />
+            <CAIAgent user={user} />
           </Layout>
         ) : null;
 

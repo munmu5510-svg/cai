@@ -1,8 +1,9 @@
-import { User, BusinessConcept } from '../types';
+import { User, BusinessConcept, ChatMessage } from '../types';
 
 const USERS_KEY = 'concept_ai_users';
 const CURRENT_USER_KEY = 'concept_ai_current_user';
 const CONCEPTS_KEY = 'concept_ai_concepts';
+const CHAT_HISTORY_KEY = 'cai_chat_history';
 
 export const storageService = {
   getUsers: (): User[] => {
@@ -36,12 +37,6 @@ export const storageService = {
   },
 
   getConcepts: (userId: string): BusinessConcept[] => {
-    const data = localStorage.getItem(CONCEPTS_KEY);
-    const allConcepts: BusinessConcept[] = data ? JSON.parse(data) : [];
-    // Filter concepts usually, but here we might just simulate a simple list per user key if we wanted strict separation.
-    // For simplicity in this demo, we'll store all and filter by logic if needed, but let's assume local storage is per browser instance for now or just filter by ID if we add userId to concept.
-    // Let's add userId to storage key to separate or filter.
-    // Since we didn't put userId in BusinessConcept in types, let's just use a separate key per user for simplicity or just return all for the demo user.
     const userConceptsKey = `${CONCEPTS_KEY}_${userId}`;
     const userData = localStorage.getItem(userConceptsKey);
     return userData ? JSON.parse(userData) : [];
@@ -56,5 +51,21 @@ export const storageService = {
       concepts.push(concept);
     }
     localStorage.setItem(`${CONCEPTS_KEY}_${userId}`, JSON.stringify(concepts));
+  },
+
+  getChatHistory: (userId: string): ChatMessage[] => {
+    const key = `${CHAT_HISTORY_KEY}_${userId}`;
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveChatHistory: (userId: string, messages: ChatMessage[]) => {
+    const key = `${CHAT_HISTORY_KEY}_${userId}`;
+    localStorage.setItem(key, JSON.stringify(messages));
+  },
+
+  clearChatHistory: (userId: string) => {
+    const key = `${CHAT_HISTORY_KEY}_${userId}`;
+    localStorage.removeItem(key);
   }
 };
