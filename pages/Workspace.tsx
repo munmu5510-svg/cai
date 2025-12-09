@@ -36,7 +36,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
       const result = await generateBusinessStrategy(prompt);
       setStrategy(result || "Failed to generate strategy.");
     } catch (e) {
-      setStrategy("Error connecting to the visionary matrix.");
+      setStrategy("System Error: An unexpected issue occurred within the UI.");
     } finally {
       setLoading(false);
     }
@@ -66,6 +66,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
     const titleSnippet = idea.split(' ').slice(0, 8).join(' ') || "Business Strategy";
     generateStrategyPDF(titleSnippet, strategy, user, Date.now());
   };
+
+  // Helper to check if the response is an error message
+  const isError = strategy.startsWith("System Error") || strategy.startsWith("Configuration Error") || strategy.startsWith("Connection Error");
 
   return (
     <div className="h-full flex flex-col md:flex-row gap-6 animate-fade-in">
@@ -111,21 +114,33 @@ export const Workspace: React.FC<WorkspaceProps> = ({ user }) => {
 
           {strategy && (
             <div className="prose prose-invert max-w-none pb-20">
-              <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-neon-cyan mb-6">
-                Strategic Blueprint
-              </h3>
-              <div className="whitespace-pre-wrap leading-relaxed text-gray-200">
-                {strategy}
-              </div>
-              
-              <div className="mt-8 pt-6 border-t border-gray-800 flex gap-4">
-                <Button variant="outline" size="sm" onClick={handleSave}>
-                  Save to Storage
-                </Button>
-                <Button variant="secondary" size="sm" onClick={handleExportPDF}>
-                  Download PDF
-                </Button>
-              </div>
+              {isError ? (
+                <div className="p-6 bg-red-900/20 border border-red-500/50 rounded-xl text-red-200">
+                  <h3 className="text-xl font-bold text-red-400 mb-2 flex items-center gap-2">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    Transmission Failed
+                  </h3>
+                  <p>{strategy}</p>
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-neon-cyan mb-6">
+                    Strategic Blueprint
+                  </h3>
+                  <div className="whitespace-pre-wrap leading-relaxed text-gray-200">
+                    {strategy}
+                  </div>
+                  
+                  <div className="mt-8 pt-6 border-t border-gray-800 flex gap-4">
+                    <Button variant="outline" size="sm" onClick={handleSave}>
+                      Save to Storage
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={handleExportPDF}>
+                      Download PDF
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </Card>
